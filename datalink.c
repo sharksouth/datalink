@@ -5,6 +5,8 @@
 #include "datalink.h"
 
 #define DATA_TIMER 2000
+#define MAX_SW 8          //发送窗口大小
+#define ACK_TIMER 300	  //ack计时器
 
 struct FRAME {
 	unsigned char kind; /* FRAME_DATA */
@@ -14,9 +16,10 @@ struct FRAME {
 	unsigned int padding;
 };
 
-static unsigned char frame_nr = 0, buffer[PKT_LEN], nbuffered;
-static unsigned char frame_expected = 0;
+static unsigned char frame_nr = 0, buffer[MAX_SW+1][PKT_LEN], nbuffered;//frame_nr目前的帧  buffer缓冲区 nb目前缓冲区
+static unsigned char frame_expected = 0;//希望收到的帧序号
 static int phl_ready = 0;
+static unsigned char next_frame = 0; //下一个要发送的帧序号
 
 static void put_frame(unsigned char *frame, int len)
 {
@@ -32,10 +35,9 @@ static void send_data_frame(void)
 	s.kind = FRAME_DATA;
 	s.seq = frame_nr;
 	s.ack = 1 - frame_expected;
+
 	memcpy(s.data, buffer, PKT_LEN);
-
 	dbg_frame("Send DATA %d %d, ID %d\n", s.seq, s.ack, *(short *)s.data);
-
 	put_frame((unsigned char *)&s, 3 + PKT_LEN);
 	start_timer(frame_nr, DATA_TIMER);
 }
@@ -60,6 +62,7 @@ int main(int argc, char **argv)
 
 	protocol_init(argc, argv);
 	lprintf("Designed by Jiang Yanjun, build: " __DATE__ "  "__TIME__"\n");
+	lprintf("杨书涵 胡圣椿 计网 2022 lab1\n");
 
 	disable_network_layer();
 
@@ -67,12 +70,20 @@ int main(int argc, char **argv)
 	{
 		event = wait_for_event(&arg);
 
-		switch (event) {
+		switch (event) 
+		{
 		case NETWORK_LAYER_READY:
-			get_packet(buffer);
+			get_packet(buffer[next_frame]);
 			nbuffered++;
 			send_data_frame();
+
+			if (next_frame < MAX_SW)//
+				next_frame++;
+			else
+				next_frame = 0;
+
 			break;
+
 
 		case PHYSICAL_LAYER_READY:
 			phl_ready = 1;
@@ -80,17 +91,18 @@ int main(int argc, char **argv)
 
 		case FRAME_RECEIVED:
 			len = recv_frame((unsigned char *)&f, sizeof f);
+
 			if (len < 5 || crc32((unsigned char *)&f, len) != 0) 
 			{
 				dbg_event("**** Receiver Error, Bad CRC Checksum\n");
 				break;
 			}
+
 			if (f.kind == FRAME_ACK)
 				dbg_frame("Recv ACK  %d\n", f.ack);
 			if (f.kind == FRAME_DATA)
 			{
-				dbg_frame("Recv DATA %d %d, ID %d\n", f.seq,
-					  f.ack, *(short *)f.data);
+				dbg_frame("Recv DATA %d %d, ID %d\n", f.seq, f.ack, *(short *)f.data);
 				if (f.seq == frame_expected) 
 				{
 					put_packet(f.data, len - 7);
