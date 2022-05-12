@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 				dbg_event("**** Receiver Error, Bad CRC Checksum\n");
 				if(nak_) 
 				{
-					send_NAK(frame_expected);
+					send_NAK_frame(frame_expected);
 					nak_ = 0;
 					stop_ack_timer();
 				}
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 				} 
 				else if (nak_) 
 				{
-					send_NAK(frame_expected);
+					send_NAK_frame(frame_expected);
 					nak_ = 0;
 					stop_ack_timer();
 				}
