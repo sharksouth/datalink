@@ -27,8 +27,6 @@ EXTRN	_strchr:PROC
 EXTRN	_strncmp:PROC
 EXTRN	___stdio_common_vfprintf:PROC
 EXTRN	___acrt_iob_func:PROC
-	ALIGN	4
-
 _optarg	DD	01H DUP (?)
 _BSS	ENDS
 _optind	DD	01H

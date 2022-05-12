@@ -13,18 +13,16 @@ struct FRAME {
 	unsigned char ack;
 	unsigned char seq;
 	unsigned char data[PKT_LEN];
-	unsigned int padding;
+	unsigned int  padding;
 };
 
-static unsigned char frame_nr = 0, buffer[MAX_SW + 1][PKT_LEN],
-		     nbuffered; //frame_nr目前的帧  buffer缓冲区 nb目前缓冲区
-static unsigned char frame_expected = 0, ack_expected; //希望收到的帧序号 ack
+static unsigned char frame_nr = 0, buffer[MAX_SW + 1][PKT_LEN], nbuffered = 0; //frame_nr目前的帧  buffer缓冲区 nb目前缓冲区
+static unsigned char frame_expected = 0, ack_expected = 0; //希望收到的帧序号 ack
 static int phl_ready = 0;
 static unsigned char next_frame = 0; //下一个要发送的帧序号
 int packet_length[MAX_SW + 1];
 
-int f_between(unsigned char a, unsigned char b,
-	      unsigned char c) //检测帧在不在当前窗口
+int f_between(unsigned char a, unsigned char b, unsigned char c) //检测帧在不在当前窗口
 {
 	if (((a <= b) && (b < c)) || ((c < a) && (a <= b)) ||((b < c) && (c < a)))
 		//a:ack_expected,b:f.ack,c:next_frame
@@ -119,7 +117,7 @@ int main(int argc, char **argv)
 				dbg_event("**** Receiver Error, Bad CRC Checksum\n");
 				if (nak_) {
 					send_nak_frame(frame_expected);
-					nak_ = 0;
+					nak_ = 1;
 					stop_ack_timer();
 				}
 				break;
@@ -131,18 +129,18 @@ int main(int argc, char **argv)
 			if (f.kind == FRAME_NAK) //收到nak 重传对应帧
 				dbg_frame("Recv NAK  %d\n", f.ack);
 
-			if (f.kind ==
-			    FRAME_DATA) //收到数据 判断是不是所期望的 是：开始ack并传输 不是：发送nak
+			if (f.kind == FRAME_DATA) //收到数据 判断是不是所期望的 是：开始ack并传输 不是：发送nak
 			{
 				dbg_frame("Recv DATA %d %d, ID %d\n", f.seq,f.ack, *(short *)f.data);
 				if (f.seq == frame_expected) {
 					put_packet(f.data, len - 7);
-
-					if (next_frame < MAX_SW) //
-						next_frame++;
-					else
-						next_frame = 0;
 					nak_ = 1;
+
+					if (frame_expected < MAX_SW) //
+						frame_expected++;
+					else
+						frame_expected = 0;
+					
 					start_ack_timer(ACK_TIMER);
 				} else if (nak_) {
 					send_nak_frame(frame_expected);
@@ -164,17 +162,17 @@ int main(int argc, char **argv)
 				nbuffered--;
 				stop_timer(ack_expected);
 
-				if (next_frame < MAX_SW) //
-					next_frame++;
+				if (ack_expected < MAX_SW) //
+					ack_expected++;
 				else
-					next_frame = 0;
+					ack_expected = 0;
 			}
 			if (f.kind == FRAME_NAK) //重传开始
 			{
 				stop_timer(ack_expected + 1);
 				next_frame = ack_expected;
 				for (int i = 0; i <= nbuffered; i++) {
-					send_data_frame(frame_expected);
+					send_data_frame();
 					start_timer(next_frame, DATA_TIMER);
 					stop_ack_timer();
 
@@ -182,6 +180,7 @@ int main(int argc, char **argv)
 						next_frame++;
 					else
 						next_frame = 0;
+
 				}
 				phl_ready = 0;
 			}
@@ -192,7 +191,7 @@ int main(int argc, char **argv)
 			dbg_event("---- DATA %d timeout\n", arg);
 			next_frame = ack_expected;
 			for (int i = 1; i <= nbuffered; i++) {
-				send_data_frame(frame_expected);
+				send_data_frame();
 				start_timer(next_frame, DATA_TIMER);
 				stop_ack_timer();
 
