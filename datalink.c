@@ -66,6 +66,18 @@ static void send_ack_frame(void)
 	put_frame((unsigned char *)&s, 2);
 }
 
+static void send_nak_frame(void)
+{
+	struct FRAME s;
+
+	s.kind = FRAME_ACK;
+	s.ack = 1 - frame_expected;
+
+	dbg_frame("Send NAK  %d\n", s.ack);
+
+	put_frame((unsigned char *)&s, 2);
+}
+
 int main(int argc, char **argv)
 {
 	int event, arg;
