@@ -5,7 +5,7 @@
 #include "datalink.h"
 
 #define DATA_TIMER 2000
-#define MAX_SW 8      //发送窗口大小
+#define MAX_SW 15      //发送窗口大小
 #define ACK_TIMER 300 //ack计时器
 
 struct FRAME {
@@ -26,8 +26,7 @@ int packet_length[MAX_SW + 1];
 int f_between(unsigned char a, unsigned char b,
 	      unsigned char c) //检测帧在不在当前窗口
 {
-	if (((a <= b) && (b < c)) || ((c < a) && (a <= b)) ||
-	    ((b < c) && (c < a)))
+	if (((a <= b) && (b < c)) || ((c < a) && (a <= b)) ||((b < c) && (c < a)))
 		//a:ack_expected,b:f.ack,c:next_frame
 		return 1;
 	else
@@ -46,13 +45,13 @@ static void send_data_frame(void)
 	struct FRAME s;
 
 	s.kind = FRAME_DATA;
-	s.seq = frame_nr;
-	s.ack = 1 - frame_expected;
+	s.seq = next_frame;
+	s.ack = (frame_expected+ MAX_SW) % (MAX_SW + 1);
 
-	memcpy(s.data, buffer, PKT_LEN);
-	dbg_frame("Send DATA %d %d, ID %d\n", s.seq, s.ack, *(short *)s.data);
+	memcpy(s.data, buffer[next_frame], PKT_LEN);
+	dbg_frame("Send DATA %d %d, ID %d windows %d\n", s.seq, s.ack, *(short *)s.data, nbuffered);
 	put_frame((unsigned char *)&s, 3 + PKT_LEN);
-	start_timer(frame_nr, DATA_TIMER);
+	start_timer(next_frame, DATA_TIMER);
 }
 
 static void send_ack_frame(unsigned char fe)
@@ -117,8 +116,7 @@ int main(int argc, char **argv)
 			len = recv_frame((unsigned char *)&f, sizeof f);
 
 			if (len < 5 || crc32((unsigned char *)&f, len) != 0) {
-				dbg_event(
-					"**** Receiver Error, Bad CRC Checksum\n");
+				dbg_event("**** Receiver Error, Bad CRC Checksum\n");
 				if (nak_) {
 					send_nak_frame(frame_expected);
 					nak_ = 0;
@@ -136,8 +134,7 @@ int main(int argc, char **argv)
 			if (f.kind ==
 			    FRAME_DATA) //收到数据 判断是不是所期望的 是：开始ack并传输 不是：发送nak
 			{
-				dbg_frame("Recv DATA %d %d, ID %d\n", f.seq,
-					  f.ack, *(short *)f.data);
+				dbg_frame("Recv DATA %d %d, ID %d\n", f.seq,f.ack, *(short *)f.data);
 				if (f.seq == frame_expected) {
 					put_packet(f.data, len - 7);
 

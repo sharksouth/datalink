@@ -446,6 +446,8 @@ PUBLIC	_start_ack_timer
 PUBLIC	_stop_timer
 PUBLIC	_put_packet
 _layer3_ready DD 01H DUP (?)
+	ALIGN	8
+
 ?last_warn@?BF@??wait_for_event@@9@9 DQ 01H DUP (?)	; `wait_for_event'::`21'::last_warn
 _send_bytes_allowed DD 01H DUP (?)
 _timer	DD	081H DUP (?)
