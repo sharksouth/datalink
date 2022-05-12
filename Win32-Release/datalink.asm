@@ -11,7 +11,7 @@ INCLUDELIB OLDNAMES
 PUBLIC	??_C@_0CD@DFMNIMLK@Send?5DATA?5?$CFd?5?$CFd?0?5ID?5?$CFd?5windows?5@ ; `string'
 PUBLIC	??_C@_0O@MEIGFFMO@Send?5ACK?5?5?$CFd?6@		; `string'
 PUBLIC	??_C@_0O@FJBKJNGC@Send?5NAK?5?5?$CFd?6@		; `string'
-PUBLIC	??_C@_0DI@DPBFKPOD@Designed?5by?5Jiang?5Yanjun?0?5build@ ; `string'
+PUBLIC	??_C@_0DI@FLJKLCEG@Designed?5by?5Jiang?5Yanjun?0?5build@ ; `string'
 PUBLIC	??_C@_0BO@BMKHOHKF@?Q?n?J?i?$LK?$KN?5?$LK?z?J?$KF?$LE?$LL?5?$LM?F?M?x?52022?5lab1?6@ ; `string'
 PUBLIC	??_C@_0CH@HDFIPIGB@?$CK?$CK?$CK?$CK?5Receiver?5Error?0?5Bad?5CRC?5Ch@ ; `string'
 PUBLIC	??_C@_0O@DBLMMIFM@Recv?5ACK?5?5?$CFd?6@		; `string'
@@ -50,10 +50,10 @@ CONST	SEGMENT
 	DB	0eeH, 0caH, 0e9H, 0baH, 0adH, ' ', 0baH, 0faH, 0caH, 0a5H, 0b4H
 	DB	0bbH, ' ', 0bcH, 0c6H, 0cdH, 0f8H, ' 2022 lab1', 0aH, 00H ; `string'
 CONST	ENDS
-;	COMDAT ??_C@_0DI@DPBFKPOD@Designed?5by?5Jiang?5Yanjun?0?5build@
+;	COMDAT ??_C@_0DI@FLJKLCEG@Designed?5by?5Jiang?5Yanjun?0?5build@
 CONST	SEGMENT
-??_C@_0DI@DPBFKPOD@Designed?5by?5Jiang?5Yanjun?0?5build@ DB 'Designed by '
-	DB	'Jiang Yanjun, build: May 12 2022  19:09:43', 0aH, 00H ; `string'
+??_C@_0DI@FLJKLCEG@Designed?5by?5Jiang?5Yanjun?0?5build@ DB 'Designed by '
+	DB	'Jiang Yanjun, build: May 12 2022  19:26:40', 0aH, 00H ; `string'
 CONST	ENDS
 ;	COMDAT ??_C@_0O@FJBKJNGC@Send?5NAK?5?5?$CFd?6@
 CONST	SEGMENT
@@ -367,7 +367,7 @@ _main	PROC						; COMDAT
 
 ; 86   : 	lprintf("Designed by Jiang Yanjun, build: " __DATE__ "  "__TIME__
 
-	push	OFFSET ??_C@_0DI@DPBFKPOD@Designed?5by?5Jiang?5Yanjun?0?5build@
+	push	OFFSET ??_C@_0DI@FLJKLCEG@Designed?5by?5Jiang?5Yanjun?0?5build@
 	call	_lprintf
 	add	esp, 4
 

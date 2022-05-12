@@ -6,7 +6,7 @@
 
 #define DATA_TIMER 2000
 #define MAX_SW 15      //发送窗口大小
-#define ACK_TIMER 300 //ack计时器
+#define ACK_TIMER 400 //ack计时器
 
 struct FRAME {
 	unsigned char kind; /* FRAME_DATA */

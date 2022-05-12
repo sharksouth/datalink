@@ -712,7 +712,7 @@ _start_ack_timer PROC					; COMDAT
 ; 556  :         timer[ACK_TIMER_ID] = now + ms;
 
 	mov	eax, DWORD PTR _now
-	add	eax, 300				; 0000012cH
+	add	eax, 400				; 00000190H
 	mov	DWORD PTR _timer+512, eax
 $LN2@start_ack_:
 
