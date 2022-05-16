@@ -6,7 +6,7 @@
 
 #define DATA_TIMER 2000
 #define MAX_SW 15      //发送窗口大小
-#define ACK_TIMER 400 //ack计时器
+#define ACK_TIMER 300 //ack计时器
 
 struct FRAME {
 	unsigned char kind; /* FRAME_DATA */
@@ -83,15 +83,15 @@ int main(int argc, char **argv)
 	int len = 0;
 
 	protocol_init(argc, argv);
-	lprintf("Designed by Jiang Yanjun, build: " __DATE__ "  "__TIME__
-		"\n");
+	lprintf("Designed by Jiang Yanjun, build: " __DATE__ "  "__TIME__"\n");
 	lprintf("杨书涵 胡圣椿 计网 2022 lab1\n");
 
 	disable_network_layer();
-
-	for (;;) {
+	int nak_ = 1;
+	for (;;)
+	{
 		event = wait_for_event(&arg);
-		int nak_ = 1;
+		
 
 		switch (event) {
 		case NETWORK_LAYER_READY:
@@ -115,7 +115,8 @@ int main(int argc, char **argv)
 
 			if (len < 5 || crc32((unsigned char *)&f, len) != 0) {
 				dbg_event("**** Receiver Error, Bad CRC Checksum\n");
-				if (nak_) {
+				if (nak_) 
+				{
 					send_nak_frame(frame_expected);
 					nak_ = 1;
 					stop_ack_timer();
@@ -131,8 +132,9 @@ int main(int argc, char **argv)
 
 			if (f.kind == FRAME_DATA) //收到数据 判断是不是所期望的 是：开始ack并传输 不是：发送nak
 			{
-				dbg_frame("Recv DATA %d %d, ID %d\n", f.seq,f.ack, *(short *)f.data);
-				if (f.seq == frame_expected) {
+				dbg_frame("Recv DATA %d %d, ID %d\n", f.seq, f.ack, *(short*)f.data);
+				if (f.seq == frame_expected)
+				{
 					put_packet(f.data, len - 7);
 					nak_ = 1;
 
@@ -140,26 +142,20 @@ int main(int argc, char **argv)
 						frame_expected++;
 					else
 						frame_expected = 0;
-					
+
 					start_ack_timer(ACK_TIMER);
-				} else if (nak_) {
+				}
+				else if (nak_)
+				{
 					send_nak_frame(frame_expected);
 					nak_ = 0;
 					stop_ack_timer();
 				}
-				//send_ack_frame();
 			}
-			/*
-			if (f.ack == frame_nr) 
-			{
-				stop_timer(frame_nr);
-				nbuffered--;
-				frame_nr = 1 - frame_nr;
-			}
-			*/
 
-			while (f_between(ack_expected, f.ack, next_frame)) {
-				nbuffered--;
+			while (f_between(ack_expected, f.ack, next_frame)) 
+			{
+				nbuffered = nbuffered - 1;
 				stop_timer(ack_expected);
 
 				if (ack_expected < MAX_SW) //
@@ -171,7 +167,8 @@ int main(int argc, char **argv)
 			{
 				stop_timer(ack_expected + 1);
 				next_frame = ack_expected;
-				for (int i = 0; i <= nbuffered; i++) {
+				for (int i = 0; i < nbuffered; i++) 
+				{
 					send_data_frame();
 					start_timer(next_frame, DATA_TIMER);
 					stop_ack_timer();
@@ -190,7 +187,8 @@ int main(int argc, char **argv)
 		case DATA_TIMEOUT:
 			dbg_event("---- DATA %d timeout\n", arg);
 			next_frame = ack_expected;
-			for (int i = 1; i <= nbuffered; i++) {
+			for (int i = 1; i <= nbuffered; i++) 
+			{
 				send_data_frame();
 				start_timer(next_frame, DATA_TIMER);
 				stop_ack_timer();
@@ -209,7 +207,7 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		if (nbuffered < 1 && phl_ready)
+		if (nbuffered < MAX_SW && phl_ready)
 			enable_network_layer();
 		else
 			disable_network_layer();

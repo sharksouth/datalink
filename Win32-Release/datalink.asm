@@ -11,7 +11,7 @@ INCLUDELIB OLDNAMES
 PUBLIC	??_C@_0CD@DFMNIMLK@Send?5DATA?5?$CFd?5?$CFd?0?5ID?5?$CFd?5windows?5@ ; `string'
 PUBLIC	??_C@_0O@MEIGFFMO@Send?5ACK?5?5?$CFd?6@		; `string'
 PUBLIC	??_C@_0O@FJBKJNGC@Send?5NAK?5?5?$CFd?6@		; `string'
-PUBLIC	??_C@_0DI@FLJKLCEG@Designed?5by?5Jiang?5Yanjun?0?5build@ ; `string'
+PUBLIC	??_C@_0DI@KCKLLKOP@Designed?5by?5Jiang?5Yanjun?0?5build@ ; `string'
 PUBLIC	??_C@_0BO@BMKHOHKF@?Q?n?J?i?$LK?$KN?5?$LK?z?J?$KF?$LE?$LL?5?$LM?F?M?x?52022?5lab1?6@ ; `string'
 PUBLIC	??_C@_0CH@HDFIPIGB@?$CK?$CK?$CK?$CK?5Receiver?5Error?0?5Bad?5CRC?5Ch@ ; `string'
 PUBLIC	??_C@_0O@DBLMMIFM@Recv?5ACK?5?5?$CFd?6@		; `string'
@@ -50,10 +50,10 @@ CONST	SEGMENT
 	DB	0eeH, 0caH, 0e9H, 0baH, 0adH, ' ', 0baH, 0faH, 0caH, 0a5H, 0b4H
 	DB	0bbH, ' ', 0bcH, 0c6H, 0cdH, 0f8H, ' 2022 lab1', 0aH, 00H ; `string'
 CONST	ENDS
-;	COMDAT ??_C@_0DI@FLJKLCEG@Designed?5by?5Jiang?5Yanjun?0?5build@
+;	COMDAT ??_C@_0DI@KCKLLKOP@Designed?5by?5Jiang?5Yanjun?0?5build@
 CONST	SEGMENT
-??_C@_0DI@FLJKLCEG@Designed?5by?5Jiang?5Yanjun?0?5build@ DB 'Designed by '
-	DB	'Jiang Yanjun, build: May 12 2022  19:26:40', 0aH, 00H ; `string'
+??_C@_0DI@KCKLLKOP@Designed?5by?5Jiang?5Yanjun?0?5build@ DB 'Designed by '
+	DB	'Jiang Yanjun, build: May 16 2022  11:56:02', 0aH, 00H ; `string'
 CONST	ENDS
 ;	COMDAT ??_C@_0O@FJBKJNGC@Send?5NAK?5?5?$CFd?6@
 CONST	SEGMENT
@@ -359,39 +359,44 @@ _main	PROC						; COMDAT
 ; 85   : 	protocol_init(argc, argv);
 
 	mov	edx, DWORD PTR _argv$[ebp]
-	sub	esp, 272				; 00000110H
+	sub	esp, 268				; 0000010cH
 	mov	ecx, DWORD PTR _argc$[ebp]
 	push	ebx
 	push	esi
+	push	edi
 	call	_protocol_init
 
-; 86   : 	lprintf("Designed by Jiang Yanjun, build: " __DATE__ "  "__TIME__
+; 86   : 	lprintf("Designed by Jiang Yanjun, build: " __DATE__ "  "__TIME__"\n");
 
-	push	OFFSET ??_C@_0DI@FLJKLCEG@Designed?5by?5Jiang?5Yanjun?0?5build@
+	push	OFFSET ??_C@_0DI@KCKLLKOP@Designed?5by?5Jiang?5Yanjun?0?5build@
 	call	_lprintf
 	add	esp, 4
 
-; 87   : 		"\n");
-; 88   : 	lprintf("杨书涵 胡圣椿 计网 2022 lab1\n");
+; 87   : 	lprintf("杨书涵 胡圣椿 计网 2022 lab1\n");
 
 	push	OFFSET ??_C@_0BO@BMKHOHKF@?Q?n?J?i?$LK?$KN?5?$LK?z?J?$KF?$LE?$LL?5?$LM?F?M?x?52022?5lab1?6@
 	call	_lprintf
 	add	esp, 4
-$LN40@main:
 
-; 89   : 
-; 90   : 	disable_network_layer();
-; 91   : 
-; 92   : 	for (;;) {
-; 93   : 		event = wait_for_event(&arg);
+; 88   : 
+; 89   : 	disable_network_layer();
 
 	call	_disable_network_layer
-	npad	8
+
+; 90   : 	int nak_ = 1;
+
+	mov	edi, 1
+	npad	2
 $LL2@main:
+
+; 91   : 	for (;;)
+; 92   : 	{
+; 93   : 		event = wait_for_event(&arg);
+
 	lea	ecx, DWORD PTR _arg$[esp+280]
 	call	_wait_for_event
 
-; 94   : 		int nak_ = 1;
+; 94   : 		
 ; 95   : 
 ; 96   : 		switch (event) {
 
@@ -476,16 +481,16 @@ $LN19@main:
 	test	eax, eax
 	jne	$LN21@main
 
-; 124  : 			}
-; 125  : 
-; 126  : 			if (f.kind == FRAME_ACK) //收到ack 不用操作
+; 125  : 			}
+; 126  : 
+; 127  : 			if (f.kind == FRAME_ACK) //收到ack 不用操作
 
 	mov	dh, BYTE PTR _f$[esp+280]
 	mov	bh, BYTE PTR _f$[esp+281]
 	cmp	dh, 2
 	jne	SHORT $LN23@main
 
-; 127  : 				dbg_frame("Recv ACK  %d\n", f.ack);
+; 128  : 				dbg_frame("Recv ACK  %d\n", f.ack);
 
 	movzx	eax, bh
 	push	eax
@@ -493,15 +498,15 @@ $LN19@main:
 	call	_dbg_frame
 	add	esp, 8
 
-; 128  : 
-; 129  : 			if (f.kind == FRAME_NAK) //收到nak 重传对应帧
+; 129  : 
+; 130  : 			if (f.kind == FRAME_NAK) //收到nak 重传对应帧
 
-	jmp	SHORT $LN61@main
+	jmp	$LN62@main
 $LN23@main:
 	cmp	dh, 3
 	jne	SHORT $LN24@main
 
-; 130  : 				dbg_frame("Recv NAK  %d\n", f.ack);
+; 131  : 				dbg_frame("Recv NAK  %d\n", f.ack);
 
 	movzx	eax, bh
 	push	eax
@@ -509,16 +514,16 @@ $LN23@main:
 	call	_dbg_frame
 	add	esp, 8
 
-; 131  : 
-; 132  : 			if (f.kind == FRAME_DATA) //收到数据 判断是不是所期望的 是：开始ack并传输 不是：发送nak
+; 132  : 
+; 133  : 			if (f.kind == FRAME_DATA) //收到数据 判断是不是所期望的 是：开始ack并传输 不是：发送nak
 
-	jmp	SHORT $LN61@main
+	jmp	SHORT $LN62@main
 $LN24@main:
 	cmp	dh, 1
 	jne	SHORT $LN44@main
 
-; 133  : 			{
-; 134  : 				dbg_frame("Recv DATA %d %d, ID %d\n", f.seq,f.ack, *(short *)f.data);
+; 134  : 			{
+; 135  : 				dbg_frame("Recv DATA %d %d, ID %d\n", f.seq, f.ack, *(short*)f.data);
 
 	movsx	eax, WORD PTR _f$[esp+283]
 	mov	bl, BYTE PTR _f$[esp+282]
@@ -531,74 +536,81 @@ $LN24@main:
 	call	_dbg_frame
 	add	esp, 16					; 00000010H
 
-; 135  : 				if (f.seq == frame_expected) {
+; 136  : 				if (f.seq == frame_expected)
 
 	cmp	bl, BYTE PTR _frame_expected
 	jne	SHORT $LN26@main
 
-; 136  : 					put_packet(f.data, len - 7);
+; 137  : 				{
+; 138  : 					put_packet(f.data, len - 7);
 
 	lea	edx, DWORD PTR [esi-7]
 	lea	ecx, DWORD PTR _f$[esp+283]
 	call	_put_packet
 
-; 137  : 					nak_ = 1;
-; 138  : 
-; 139  : 					if (frame_expected < MAX_SW) //
+; 139  : 					nak_ = 1;
+; 140  : 
+; 141  : 					if (frame_expected < MAX_SW) //
 
 	mov	al, BYTE PTR _frame_expected
+	mov	edi, 1
 	cmp	al, 15					; 0000000fH
 	jae	SHORT $LN28@main
 
-; 140  : 						frame_expected++;
+; 142  : 						frame_expected++;
 
 	inc	al
 
-; 143  : 					
-; 144  : 					start_ack_timer(ACK_TIMER);
+; 145  : 
+; 146  : 					start_ack_timer(ACK_TIMER);
 
 	mov	BYTE PTR _frame_expected, al
 	call	_start_ack_timer
-	jmp	SHORT $LN61@main
+
+; 147  : 				}
+
+	jmp	SHORT $LN62@main
 $LN28@main:
 
-; 141  : 					else
-; 142  : 						frame_expected = 0;
+; 143  : 					else
+; 144  : 						frame_expected = 0;
 
 	xor	al, al
 
-; 143  : 					
-; 144  : 					start_ack_timer(ACK_TIMER);
+; 145  : 
+; 146  : 					start_ack_timer(ACK_TIMER);
 
 	mov	BYTE PTR _frame_expected, al
 	call	_start_ack_timer
-	jmp	SHORT $LN61@main
+
+; 147  : 				}
+
+	jmp	SHORT $LN62@main
 $LN26@main:
 
-; 145  : 				} else if (nak_) {
-; 146  : 					send_nak_frame(frame_expected);
+; 148  : 				else if (nak_)
+
+	test	edi, edi
+	je	SHORT $LN62@main
+
+; 149  : 				{
+; 150  : 					send_nak_frame(frame_expected);
 
 	call	_send_nak_frame
 
-; 147  : 					nak_ = 0;
-; 148  : 					stop_ack_timer();
+; 151  : 					nak_ = 0;
+
+	xor	edi, edi
+
+; 152  : 					stop_ack_timer();
 
 	call	_stop_ack_timer
-$LN61@main:
+$LN62@main:
 
-; 149  : 				}
-; 150  : 				//send_ack_frame();
-; 151  : 			}
-; 152  : 			/*
-; 153  : 			if (f.ack == frame_nr) 
-; 154  : 			{
-; 155  : 				stop_timer(frame_nr);
-; 156  : 				nbuffered--;
-; 157  : 				frame_nr = 1 - frame_nr;
-; 158  : 			}
-; 159  : 			*/
-; 160  : 
-; 161  : 			while (f_between(ack_expected, f.ack, next_frame)) {
+; 153  : 				}
+; 154  : 			}
+; 155  : 
+; 156  : 			while (f_between(ack_expected, f.ack, next_frame)) 
 
 	mov	dh, BYTE PTR _f$[esp+280]
 $LN44@main:
@@ -609,49 +621,41 @@ $LN44@main:
 	add	esp, 4
 	test	eax, eax
 	je	SHORT $LN8@main
-	npad	8
+	npad	10
 $LL7@main:
 
-; 162  : 				nbuffered--;
+; 157  : 			{
+; 158  : 				nbuffered = nbuffered - 1;
 
 	dec	BYTE PTR _nbuffered
 
-; 163  : 				stop_timer(ack_expected);
+; 159  : 				stop_timer(ack_expected);
 
 	movzx	ecx, bl
 	call	_stop_timer
 
-; 164  : 
-; 165  : 				if (ack_expected < MAX_SW) //
+; 160  : 
+; 161  : 				if (ack_expected < MAX_SW) //
 
 	cmp	bl, 15					; 0000000fH
 	jae	SHORT $LN31@main
 
-; 166  : 					ack_expected++;
+; 162  : 					ack_expected++;
 
 	inc	bl
 	jmp	SHORT $LN32@main
 $LN31@main:
 
-; 167  : 				else
-; 168  : 					ack_expected = 0;
+; 163  : 				else
+; 164  : 					ack_expected = 0;
 
 	xor	bl, bl
 $LN32@main:
 
-; 149  : 				}
-; 150  : 				//send_ack_frame();
-; 151  : 			}
-; 152  : 			/*
-; 153  : 			if (f.ack == frame_nr) 
-; 154  : 			{
-; 155  : 				stop_timer(frame_nr);
-; 156  : 				nbuffered--;
-; 157  : 				frame_nr = 1 - frame_nr;
-; 158  : 			}
-; 159  : 			*/
-; 160  : 
-; 161  : 			while (f_between(ack_expected, f.ack, next_frame)) {
+; 153  : 				}
+; 154  : 			}
+; 155  : 
+; 156  : 			while (f_between(ack_expected, f.ack, next_frame)) 
 
 	push	ecx
 	mov	dl, bh
@@ -662,77 +666,80 @@ $LN32@main:
 	jne	SHORT $LL7@main
 $LN8@main:
 
-; 169  : 			}
-; 170  : 			if (f.kind == FRAME_NAK) //重传开始
+; 165  : 			}
+; 166  : 			if (f.kind == FRAME_NAK) //重传开始
 
 	cmp	dh, 3
 	jne	$LN59@main
 
-; 171  : 			{
-; 172  : 				stop_timer(ack_expected + 1);
+; 167  : 			{
+; 168  : 				stop_timer(ack_expected + 1);
 
 	movzx	ecx, bl
 	inc	ecx
 	call	_stop_timer
 
-; 173  : 				next_frame = ack_expected;
-
-	mov	BYTE PTR _next_frame, bl
-
-; 174  : 				for (int i = 0; i <= nbuffered; i++) {
+; 169  : 				next_frame = ack_expected;
+; 170  : 				for (int i = 0; i < nbuffered; i++) 
 
 	xor	esi, esi
+	mov	BYTE PTR _next_frame, bl
+	cmp	BYTE PTR _nbuffered, 0
+	jbe	SHORT $LN10@main
 $LL11@main:
 
-; 175  : 					send_data_frame();
+; 171  : 				{
+; 172  : 					send_data_frame();
 
 	call	_send_data_frame
 
-; 176  : 					start_timer(next_frame, DATA_TIMER);
+; 173  : 					start_timer(next_frame, DATA_TIMER);
 
 	movzx	ecx, BYTE PTR _next_frame
 	call	_start_timer
 
-; 177  : 					stop_ack_timer();
+; 174  : 					stop_ack_timer();
 
 	call	_stop_ack_timer
 
-; 178  : 
-; 179  : 					if (next_frame < MAX_SW) //
+; 175  : 
+; 176  : 					if (next_frame < MAX_SW) //
 
 	mov	al, BYTE PTR _next_frame
 	cmp	al, 15					; 0000000fH
 	jae	SHORT $LN34@main
 
-; 180  : 						next_frame++;
+; 177  : 						next_frame++;
 
 	inc	al
 	jmp	SHORT $LN9@main
 $LN34@main:
 
-; 181  : 					else
-; 182  : 						next_frame = 0;
+; 178  : 					else
+; 179  : 						next_frame = 0;
 
 	xor	al, al
 $LN9@main:
 
-; 174  : 				for (int i = 0; i <= nbuffered; i++) {
+; 169  : 				next_frame = ack_expected;
+; 170  : 				for (int i = 0; i < nbuffered; i++) 
 
 	mov	BYTE PTR _next_frame, al
 	inc	esi
 	movzx	eax, BYTE PTR _nbuffered
 	cmp	esi, eax
-	jle	SHORT $LL11@main
+	jl	SHORT $LL11@main
+$LN10@main:
 
-; 183  : 
-; 184  : 				}
-; 185  : 				phl_ready = 0;
+; 180  : 
+; 181  : 				}
+; 182  : 				phl_ready = 0;
 
 	mov	DWORD PTR _phl_ready, 0
 
-; 186  : 			}
-; 187  : 
-; 188  : 			break;
+; 183  : 			}
+; 184  : 
+; 185  : 			break;
 
 	jmp	$LN59@main
 $LN21@main:
@@ -743,122 +750,137 @@ $LN21@main:
 	call	_dbg_event
 	add	esp, 4
 
-; 118  : 				if (nak_) {
-; 119  : 					send_nak_frame(frame_expected);
+; 118  : 				if (nak_) 
+
+	test	edi, edi
+	je	$LN59@main
+
+; 119  : 				{
+; 120  : 					send_nak_frame(frame_expected);
 
 	call	_send_nak_frame
 
-; 120  : 					nak_ = 1;
-; 121  : 					stop_ack_timer();
-; 122  : 				}
-; 123  : 				break;
+; 121  : 					nak_ = 1;
 
-	jmp	SHORT $LN62@main
+	mov	edi, 1
+
+; 122  : 					stop_ack_timer();
+; 123  : 				}
+; 124  : 				break;
+
+	jmp	SHORT $LN63@main
 $LN36@main:
 
-; 189  : 
-; 190  : 		case DATA_TIMEOUT:
-; 191  : 			dbg_event("---- DATA %d timeout\n", arg);
+; 186  : 
+; 187  : 		case DATA_TIMEOUT:
+; 188  : 			dbg_event("---- DATA %d timeout\n", arg);
 
 	push	DWORD PTR _arg$[esp+280]
 	push	OFFSET ??_C@_0BG@CGEOBPGK@?9?9?9?9?5DATA?5?$CFd?5timeout?6@
 	call	_dbg_event
 
-; 192  : 			next_frame = ack_expected;
+; 189  : 			next_frame = ack_expected;
 
 	mov	al, BYTE PTR _ack_expected
 	add	esp, 8
 
-; 193  : 			for (int i = 1; i <= nbuffered; i++) {
+; 190  : 			for (int i = 1; i <= nbuffered; i++) 
 
 	cmp	BYTE PTR _nbuffered, 1
 	mov	esi, 1
 	mov	BYTE PTR _next_frame, al
-	jb	SHORT $LN13@main
-	npad	6
+	jb	SHORT $LN10@main
 $LL14@main:
 
-; 194  : 				send_data_frame();
+; 191  : 			{
+; 192  : 				send_data_frame();
 
 	call	_send_data_frame
 
-; 195  : 				start_timer(next_frame, DATA_TIMER);
+; 193  : 				start_timer(next_frame, DATA_TIMER);
 
 	movzx	ecx, BYTE PTR _next_frame
 	call	_start_timer
 
-; 196  : 				stop_ack_timer();
+; 194  : 				stop_ack_timer();
 
 	call	_stop_ack_timer
 
-; 197  : 
-; 198  : 				if (next_frame < MAX_SW) //
+; 195  : 
+; 196  : 				if (next_frame < MAX_SW) //
 
 	mov	al, BYTE PTR _next_frame
 	cmp	al, 15					; 0000000fH
 	jae	SHORT $LN37@main
 
-; 199  : 					next_frame++;
+; 197  : 					next_frame++;
 
 	inc	al
 	jmp	SHORT $LN12@main
 $LN37@main:
 
-; 200  : 				else
-; 201  : 					next_frame = 0;
+; 198  : 				else
+; 199  : 					next_frame = 0;
 
 	xor	al, al
 $LN12@main:
 
-; 193  : 			for (int i = 1; i <= nbuffered; i++) {
+; 190  : 			for (int i = 1; i <= nbuffered; i++) 
 
 	mov	BYTE PTR _next_frame, al
 	inc	esi
 	movzx	eax, BYTE PTR _nbuffered
 	cmp	esi, eax
 	jle	SHORT $LL14@main
-$LN13@main:
 
-; 202  : 			}
-; 203  : 			phl_ready = 0;
+; 200  : 			}
+; 201  : 			phl_ready = 0;
 
 	mov	DWORD PTR _phl_ready, 0
 
-; 204  : 			break;
+; 202  : 			break;
 
 	jmp	SHORT $LN59@main
 $LN39@main:
 
-; 205  : 
-; 206  : 		case ACK_TIMEOUT:
-; 207  : 			send_ack_frame(frame_expected);
+; 203  : 
+; 204  : 		case ACK_TIMEOUT:
+; 205  : 			send_ack_frame(frame_expected);
 
 	call	_send_ack_frame
-$LN62@main:
+$LN63@main:
 
-; 208  : 			stop_ack_timer();
-; 209  : 			break;
-; 210  : 		}
-; 211  : 
-; 212  : 		if (nbuffered < 1 && phl_ready)
+; 206  : 			stop_ack_timer();
+; 207  : 			break;
+; 208  : 		}
+; 209  : 
+; 210  : 		if (nbuffered < MAX_SW && phl_ready)
 
 	call	_stop_ack_timer
 $LN59@main:
-	cmp	BYTE PTR _nbuffered, 1
-	jae	$LN40@main
+	cmp	BYTE PTR _nbuffered, 15			; 0000000fH
+	jae	SHORT $LN40@main
 	cmp	DWORD PTR _phl_ready, 0
-	je	$LN40@main
+	je	SHORT $LN40@main
 
-; 213  : 			enable_network_layer();
+; 211  : 			enable_network_layer();
 
 	call	_enable_network_layer
 	jmp	$LL2@main
+$LN40@main:
+
+; 212  : 		else
+; 213  : 			disable_network_layer();
+
+	call	_disable_network_layer
+
+; 214  : 	}
+
+	jmp	$LL2@main
+	npad	2
 $LN57@main:
 
-; 214  : 		else
-; 215  : 			disable_network_layer();
-; 216  : 	}
-; 217  : }
+; 215  : }
 
 	DD	$LN15@main
 	DD	$LN18@main

@@ -36,7 +36,7 @@ PUBLIC	??_C@_06OIFPHLBJ@?9B?4log@			; `string'
 PUBLIC	??_C@_01NOFIACDB@w@				; `string'
 PUBLIC	??_C@_0CN@PDGAEBAI@WARNING?3?5Failed?5to?5create?5log?5f@ ; `string'
 PUBLIC	??_C@_0LL@OOBLHPFO@?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN@ ; `string'
-PUBLIC	??_C@_0M@KDHDHOOB@May?512?52022@		; `string'
+PUBLIC	??_C@_0M@FHDMFKPC@May?516?52022@		; `string'
 PUBLIC	??_C@_03EMGHBCAM@4?40@				; `string'
 PUBLIC	??_C@_0DH@PFKHDMOI@Protocol?4lib?0?5version?5?$CFs?0?5jiang@ ; `string'
 PUBLIC	??_C@_0DK@PBDLHNIJ@Channel?3?5?$CFd?5bps?0?5?$CFd?5ms?5propagat@ ; `string'
@@ -285,9 +285,9 @@ CONST	ENDS
 CONST	SEGMENT
 ??_C@_03EMGHBCAM@4?40@ DB '4.0', 00H			; `string'
 CONST	ENDS
-;	COMDAT ??_C@_0M@KDHDHOOB@May?512?52022@
+;	COMDAT ??_C@_0M@FHDMFKPC@May?516?52022@
 CONST	SEGMENT
-??_C@_0M@KDHDHOOB@May?512?52022@ DB 'May 12 2022', 00H	; `string'
+??_C@_0M@FHDMFKPC@May?516?52022@ DB 'May 16 2022', 00H	; `string'
 CONST	ENDS
 ;	COMDAT ??_C@_0LL@OOBLHPFO@?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN?$DN@
 CONST	SEGMENT
@@ -712,7 +712,7 @@ _start_ack_timer PROC					; COMDAT
 ; 556  :         timer[ACK_TIMER_ID] = now + ms;
 
 	mov	eax, DWORD PTR _now
-	add	eax, 400				; 00000190H
+	add	eax, 300				; 0000012cH
 	mov	DWORD PTR _timer+512, eax
 $LN2@start_ack_:
 
@@ -2688,7 +2688,7 @@ $LN28@config:
 ; 242  : 
 ; 243  : 	lprintf("Protocol.lib, version %s, jiangyanjun0718@bupt.edu.cn\n", VERSION, __DATE__);
 
-	push	OFFSET ??_C@_0M@KDHDHOOB@May?512?52022@
+	push	OFFSET ??_C@_0M@FHDMFKPC@May?516?52022@
 	push	OFFSET ??_C@_03EMGHBCAM@4?40@
 	push	OFFSET ??_C@_0DH@PFKHDMOI@Protocol?4lib?0?5version?5?$CFs?0?5jiang@
 	call	_lprintf
